@@ -1,13 +1,13 @@
 import {
   EMPHASYSIS_PATTERN,
-  ORDERED_LIST_PATTERN,
+  LIST_PATTERN,
   HEADING_PATTERN,
   BOLD_ITALIC_TEXT_PATTERN,
   HEADING_LEVELS_PATTERN,
   BOLD_TEXT_PATTERN,
 } from "./constants.mjs";
 
-import Helper from "./helpers";
+import Helper from "./helpers.mjs";
 
 class Lexer {
   constructor(text) {
@@ -69,10 +69,10 @@ class Lexer {
           metadata: { prefix: "-" },
           value: LINE.slice(2).trim(),
         });
-      } else if (ORDERED_LIST_PATTERN.test(LINE)) {
+      } else if (LIST_PATTERN.test(LINE)) {
         this.tokens.push({
           type: "BULLET_LIST",
-          metadata: { prefix: LINE.match(ORDERED_LIST_PATTERN)[0] },
+          metadata: { prefix: LINE.match(LIST_PATTERN)[0] },
           value: LINE.slice(2).trim(),
         });
       } else if (HEADING_PATTERN.test(LINE)) {
@@ -91,21 +91,22 @@ class Lexer {
         const words = LINE.match(EMPHASYSIS_PATTERN);
         for (const word of words) {
           const helper = new Helper();
-          const { test: italic, length } = Helper.sayTrue(word);
-          if (test) {
+          const { test: pattern, length, cutter } = helper.sayTrue(word);
+
+          if (pattern && length % 3 == 0) {
             this.tokens.push({
               type: "BOLD_ITALIC_TEXT",
-              value: word.slice(3, -3),
+              value: word.slice(cutter, -cutter),
             });
-          } else if (word.startsWith("**")) {
+          } else if (pattern && length % 2 == 0) {
             this.tokens.push({
               type: "BOLD_TEXT",
-              value: word.slice(2, -2),
+              value: word.slice(cutter, -cutter),
             });
-          } else if (word.startsWith("*")) {
+          } else if (pattern && length % 1 == 0) {
             this.tokens.push({
               type: "ITALIC_TEXT",
-              value: word.slice(1, -1),
+              value: word.slice(cutter, -cutter),
             });
           }
         }
@@ -131,6 +132,7 @@ para contradizer a este pradrão basta adicionar o **sufixo**
 3. Porque numeros de tipo ponto flutuante não podem ser *signed* ou *unsigned*
 
 - more subject something something
+- test this - *italic*a*  **a** ***b*** ******j******
 `);
 
 console.log(md.eachToken());

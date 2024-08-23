@@ -1,8 +1,9 @@
-export const EMPHASYSIS_PATTERN = /\*+(.*?)\*+/g;
+export const EMPHASYSIS_PATTERN =
+  /(\*\*\*[^*]+\*\*\*)|(\*\*(?=\S)[^*]+(?<=\S)\*\*)|(\*(?=\S)[^*]+(?<=\S)\*)/g;
 
 export const BOLD_TEXT_PATTERN = /(?:\*\*|__)([^*__]+?)(?:\*\*|__)/g;
 
-export const ORDERED_LIST_PATTERN = /^\d+\.\s/;
+export const LIST_PATTERN = /^\d+\.\s/;
 
 export const BOLD_ITALIC_TEXT_PATTERN =
   /(?:\*\*\*|___)([^*__]+?)(?:\*\*\*|___)/g;
