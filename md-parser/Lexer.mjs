@@ -42,24 +42,6 @@ class Lexer {
     return null;
   }
 
-  isalNum(char) {
-    const pattern = /^[a-zA-Z0-9]+$/;
-    return pattern.test(char);
-  }
-
-  emphasasis({ pattern, char, type, text }) {
-    let match = Array.from(text.match(pattern));
-    const matches = match.map((i) => {
-      let StartIndex = i.indexOf(char);
-      let EndIndex = i.lastIndexOf(char);
-
-      this.tokens.push({
-        type,
-        value: i.slice(StartIndex + char.length, EndIndex),
-      });
-    });
-  }
-
   eachToken() {
     let LINES = this.LINE;
     for (const LINE of LINES) {
@@ -75,7 +57,8 @@ class Lexer {
           metadata: { prefix: LINE.match(LIST_PATTERN)[0] },
           value: LINE.slice(2).trim(),
         });
-      } else if (HEADING_PATTERN.test(LINE)) {
+      }
+      if (HEADING_PATTERN.test(LINE)) {
         for (const [_LEVELS, { pattern, type }] of Object.entries(
           HEADING_LEVELS_PATTERN,
         )) {
@@ -91,19 +74,20 @@ class Lexer {
         const words = LINE.match(EMPHASYSIS_PATTERN);
         for (const word of words) {
           const helper = new Helper();
-          const { test: pattern, length, cutter } = helper.sayTrue(word);
+          const { isValidPattern, length, cutter } =
+            helper.processAsteriskPattern(word);
 
-          if (pattern && length % 3 == 0) {
+          if (isValidPattern && length % 3 == 0) {
             this.tokens.push({
               type: "BOLD_ITALIC_TEXT",
               value: word.slice(cutter, -cutter),
             });
-          } else if (pattern && length % 2 == 0) {
+          } else if (isValidPattern && length % 2 == 0) {
             this.tokens.push({
               type: "BOLD_TEXT",
               value: word.slice(cutter, -cutter),
             });
-          } else if (pattern && length % 1 == 0) {
+          } else if (isValidPattern && length % 1 == 0) {
             this.tokens.push({
               type: "ITALIC_TEXT",
               value: word.slice(cutter, -cutter),
@@ -117,21 +101,36 @@ class Lexer {
 }
 
 const md = new Lexer(`
-# floating point types
+  # Heading 1
 
-em c++ todo numeric literal de ponto flutuante automaticamente possui o tipo double.
-para contradizer a este pradrão basta adicionar o **sufixo**
-***ok ok ok*** vibe is over or *****not*****
-(f, F) ao literal de ponto flutuante, isso ira torna-lo em um valor de ponto flutuante.
-==obviamente, você não pode usar o sufixo em valores já assinados commo double==
+  This is the first paragraph. **It contains bold text** and *italicized text*. Here is a [link](https://www.example.com) for testing purposes.
 
-## Questions about "entendendo c++"
+  ## Heading 2
 
-1. why -> ==you cannot change a double variable into a float variable by appending an f. Attempting to do so would change the name of the variable!==
-2. Em um numero o que é a mantissa?
-3. Porque numeros de tipo ponto flutuante não podem ser *signed* ou *unsigned*
+  The second paragraph includes a list:
+  - **Item 1** with *emphasis*
+  - *Item 2* with **strong emphasis**
+  - A simple item with \`inline code\`
 
-- more subject something something
+  ### Heading 3
+
+  Here's the third paragraph. You can use \`code blocks\`:
+  console.log("Hello, World!");
+
+
+  #### Heading 4
+
+  The final paragraph includes a blockquote:
+  > This is a blockquote.
+  > It has **bold** and *italic* text.
+
+  ## Usage Examples
+
+  Here are some common elements in Markdown:
+  1. **Headings** are created using hash symbols.
+  2. *Lists* can be either ordered or unordered.
+  3. \`Code blocks\` are often used to display code snippets.
+
 - test this - *italic*a*  **a** ***b*** ******j******
 `);
 
