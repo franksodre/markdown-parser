@@ -13,20 +13,20 @@ class Helper {
    * @param {string} word
    */
 
-  sayTrue(word) {
+  processAsteriskPattern(word) {
     let str = word.match(/^\*+/)[0];
     if (word.startsWith(str) && word.endsWith(str)) {
       if (str.length > 3) {
         for (let i = 0; i < str.length; i++) {
           let resto = str.length - 3;
           return {
-            test: true,
+            isValidPattern: true,
             length: resto,
             cutter: str.length,
           };
         }
       }
-      return { test: true, length: str.length, cutter: str.length };
+      return { isValidPattern: true, length: str.length, cutter: str.length };
     }
 
     return false;
